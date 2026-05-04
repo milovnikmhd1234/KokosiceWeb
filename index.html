@@ -31,6 +31,7 @@
             display: flex;
             flex-direction: column;
             box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+            overflow-y: auto;
         }
 
         .sidebar-header {
@@ -62,10 +63,7 @@
             border-left: 4px solid transparent;
         }
 
-        .nav-item:hover {
-            background: rgba(255,255,255,0.1);
-        }
-
+        .nav-item:hover { background: rgba(255,255,255,0.1); }
         .nav-item.active {
             background: rgba(255,255,255,0.1);
             border-left: 4px solid var(--accent);
@@ -76,24 +74,55 @@
         .main-content {
             margin-left: 260px;
             padding: 40px;
-            width: 100%;
+            width: calc(100% - 260px);
         }
 
-        .page { display: none; }
+        .page { display: none; animation: fadeIn 0.3s; }
         .page.active { display: block; }
 
-        h1 { color: var(--primary); margin-top: 0; border-bottom: 2px solid var(--accent); padding-bottom: 10px; }
-        h2 { color: var(--primary); margin-top: 30px; }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
 
-        /* Karty a seznamy */
+        h1 { color: var(--primary); margin-top: 0; border-bottom: 2px solid var(--accent); padding-bottom: 10px; }
+        
+        /* Karty s fotkami */
         .card {
             background: white;
             padding: 20px;
             border-radius: 8px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-            margin-bottom: 20px;
+            margin-bottom: 25px;
         }
 
+        .vehicle-img {
+            width: 100%;
+            max-height: 300px;
+            object-fit: cover;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+        }
+
+        .fleet-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+            gap: 8px;
+            margin-top: 15px;
+        }
+
+        .v-badge {
+            background: #f1f1f1;
+            padding: 8px;
+            text-align: center;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+            font-weight: bold;
+            font-size: 0.85rem;
+        }
+
+        /* Linky */
         .route-card {
             background: white;
             border-left: 5px solid var(--accent);
@@ -103,30 +132,12 @@
             box-shadow: 0 2px 5px rgba(0,0,0,0.05);
         }
 
-        .route-header { font-weight: bold; font-size: 1.2rem; margin-bottom: 5px; color: var(--accent); }
-        .route-stops { line-height: 1.6; color: #555; }
-
-        .fleet-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-            gap: 10px;
-            margin-top: 15px;
-        }
-
-        .v-badge {
-            background: #f1f1f1;
-            padding: 10px;
-            text-align: center;
-            border-radius: 4px;
-            border: 1px solid #ddd;
-            font-weight: bold;
-            font-size: 0.9rem;
-        }
+        .route-header { font-weight: bold; font-size: 1.1rem; color: var(--accent); }
 
         @media (max-width: 768px) {
             body { flex-direction: column; }
             .sidebar { width: 100%; height: auto; position: relative; }
-            .main-content { margin-left: 0; padding: 20px; }
+            .main-content { margin-left: 0; padding: 20px; width: 100%; }
         }
     </style>
 </head>
@@ -160,40 +171,22 @@
     <div id="home" class="page active">
         <h1>Vítejte v systému</h1>
         <div class="card">
-            <p>Tento web obsahuje kompletní evidenci vozového parku a přehled linek.</p>
-            <p><strong>Statistiky:</strong><br>
-            • Celkem vozů: 59<br>
-            • Celkem linek: 4</p>
+            <p>Vítejte v evidenci vozového parku. Vyberte si kategorii v levém menu pro zobrazení detailů a fotografií.</p>
         </div>
     </div>
 
     <div id="linky" class="page">
         <h1>Seznam linek</h1>
-        
-        <div class="route-card">
-            <div class="route-header">Linka 1 (Trolejbus)</div>
-            <div class="route-stops">Základní škola, Zemědělská zóna, Náměstí 1. Máje, Náměstí Boženy Moravské, Depo Trolejbusů</div>
-        </div>
-
-        <div class="route-card">
-            <div class="route-header">Linka 2</div>
-            <div class="route-stops">Depo Trolejbusu, Nákupní středisko, Hlavní nádraží, Tesco, Depo Autobusu, Ústřední autobusové Nádraží</div>
-        </div>
-
-        <div class="route-card">
-            <div class="route-header">Linka 12</div>
-            <div class="route-stops">Depo autobusu, ÚAN (Ústřední autobusové nádraží), Hospoda, Základní škola</div>
-        </div>
-
-        <div class="route-card">
-            <div class="route-header">Linka 13 (Expres)</div>
-            <div class="route-stops">ÚAN, Hlavní nádraží</div>
-        </div>
+        <div class="route-card"><div class="route-header">Linka 1 (Trolejbus)</div><div>Základní škola - Zemědělská zóna - Náměstí 1. Máje - Náměstí Boženy Moravské - Depo Trolejbusů</div></div>
+        <div class="route-card"><div class="route-header">Linka 2</div><div>Depo Trolejbusu - Nákupní středisko - Hlavní nádraží - Tesco - Depo Autobusu - ÚAN</div></div>
+        <div class="route-card"><div class="route-header">Linka 12</div><div>Depo autobusu - ÚAN - Hospoda - Základní škola</div></div>
+        <div class="route-card"><div class="route-header">Linka 13 (Expres)</div><div>ÚAN - Hlavní nádraží</div></div>
     </div>
 
     <div id="sor" class="page">
         <h1>Autobusy SOR</h1>
         <div class="card">
+            <img src="[attachment_5](attachment)" class="vehicle-img" alt="SOR C12">
             <h3>Model: SOR C12 (001 - 010)</h3>
             <div class="fleet-grid" id="grid-sor"></div>
         </div>
@@ -202,6 +195,7 @@
     <div id="iveco" class="page">
         <h1>Iveco</h1>
         <div class="card">
+            <img src="[attachment_2](attachment)" class="vehicle-img" alt="Iveco Crossway">
             <h3>Model: Crossway 12 LE (011 - 020)</h3>
             <div class="fleet-grid" id="grid-iveco"></div>
         </div>
@@ -210,6 +204,7 @@
     <div id="irisbus" class="page">
         <h1>Irisbus</h1>
         <div class="card">
+            <img src="[attachment_0](attachment)" class="vehicle-img" alt="Irisbus Axer">
             <h3>Model: Axer (021 - 025)</h3>
             <div class="fleet-grid" id="grid-irisbus"></div>
         </div>
@@ -218,6 +213,7 @@
     <div id="karosa" class="page">
         <h1>Karosa</h1>
         <div class="card">
+            <img src="[attachment_1](attachment)" class="vehicle-img" alt="Karosa ŠM 16.5">
             <h3>Model: ŠM 16.5 (026 - 035)</h3>
             <div class="fleet-grid" id="grid-karosa"></div>
         </div>
@@ -226,14 +222,12 @@
     <div id="trolejbusy" class="page">
         <h1>Trolejbusy</h1>
         <div class="card">
+            <img src="[attachment_3](attachment)" class="vehicle-img" alt="SOR TNB 12">
             <h3>SOR TNB 12 (050 - 059)</h3>
             <div class="fleet-grid" id="grid-tnb"></div>
         </div>
         <div class="card">
-            <h3>SOR TNS 12 (060 - 065)</h3>
-            <div class="fleet-grid" id="grid-tns"></div>
-        </div>
-        <div class="card">
+            <img src="[attachment_4](attachment)" class="vehicle-img" alt="Škoda 26 Tr">
             <h3>Škoda 26 Tr (066 - 070)</h3>
             <div class="fleet-grid" id="grid-skoda"></div>
         </div>
@@ -242,7 +236,8 @@
     <div id="skola" class="page">
         <h1>Škola</h1>
         <div class="card">
-            <h3>Školní vozy SOR C12 (9917 - 9919)</h3>
+            <img src="[attachment_5](attachment)" class="vehicle-img" alt="SOR Školní">
+            <h3>Školní vozy SOR (9917 - 9919)</h3>
             <div class="fleet-grid" id="grid-skola"></div>
         </div>
     </div>
@@ -250,22 +245,14 @@
 </div>
 
 <script>
-    // Funkce pro přepínání stránek
     function showPage(pageId, element) {
-        // Skrýt všechny stránky
-        const pages = document.querySelectorAll('.page');
-        pages.forEach(p => p.classList.remove('active'));
-
-        // Zobrazit vybranou stránku
+        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
         document.getElementById(pageId).classList.add('active');
-
-        // Nastavit aktivní tlačítko v menu
-        const navItems = document.querySelectorAll('.nav-item');
-        navItems.forEach(item => item.classList.remove('active'));
+        document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
         element.classList.add('active');
+        window.scrollTo(0,0);
     }
 
-    // Pomocná funkce pro vygenerování čísel vozů
     function generateNumbers(containerId, start, end) {
         const container = document.getElementById(containerId);
         for (let i = start; i <= end; i++) {
@@ -276,7 +263,6 @@
         }
     }
 
-    // Spustit po načtení
     window.onload = function() {
         generateNumbers('grid-sor', 1, 10);
         generateNumbers('grid-iveco', 11, 20);
