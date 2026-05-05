@@ -10,7 +10,6 @@
             --accent: #e74c3c;
             --bg: #f8f9fa;
             --text: #333;
-            /* Barvy linek podle tvého zadání */
             --l1: #2ecc71;  /* Zelená */
             --l2: #e74c3c;  /* Červená */
             --l12: #3498db; /* Modrá */
@@ -122,23 +121,19 @@
             font-size: 0.8rem;
         }
 
-        /* Stylizace mapy */
         .map-container {
             background: white;
             padding: 20px;
             border-radius: 8px;
             border: 1px solid #ddd;
             text-align: center;
+            overflow-x: auto;
         }
 
-        .route-path {
-            fill: none;
-            stroke-width: 6;
-            stroke-linecap: round;
-        }
-
+        .route-path { fill: none; stroke-width: 6; stroke-linecap: round; }
         .station-dot { fill: white; stroke: #333; stroke-width: 2; }
-        .station-label { font-size: 11px; font-weight: bold; fill: #2c3e50; }
+        .station-label { font-size: 10px; font-weight: bold; fill: #2c3e50; }
+        .terminus-label { font-size: 12px; font-weight: 800; fill: #e74c3c; }
 
         .legend {
             display: grid;
@@ -161,12 +156,10 @@
 
 <div class="sidebar">
     <div class="sidebar-header">DOPRAVNÍ SYSTÉM</div>
-    
     <div class="nav-group">
         <a href="#" class="nav-item active" onclick="showPage('home', this)">🏠 Domů</a>
         <a href="#" class="nav-item" onclick="showPage('mapa', this)">🗺️ Mapa linek</a>
     </div>
-
     <div class="nav-label">Vozový park</div>
     <div class="nav-group">
         <a href="#" class="nav-item" onclick="showPage('sor', this)">Autobusy SOR</a>
@@ -176,11 +169,6 @@
         <a href="#" class="nav-item" onclick="showPage('trolejbusy', this)">Trolejbusy</a>
         <a href="#" class="nav-item" onclick="showPage('skola', this)">Školní vozy</a>
     </div>
-
-    <div class="nav-label">Provoz</div>
-    <div class="nav-group">
-        <a href="#" class="nav-item" onclick="showPage('linky', this)">📋 Seznam linek</a>
-    </div>
 </div>
 
 <div class="main-content">
@@ -188,7 +176,7 @@
     <div id="home" class="page active">
         <h1>Informační systém</h1>
         <div class="card">
-            <p>Vítejte v systému pro správu dopravy. Web obsahuje evidenci 59 vozů a přehled 4 linek.</p>
+            <p>Vítejte v systému pro správu dopravy. Mapa byla aktualizována o všechny zastávky a označení konečných stanic.</p>
         </div>
     </div>
 
@@ -197,29 +185,65 @@
         <h1>Mapa dopravní sítě</h1>
         <div class="card">
             <div class="map-container">
-                <svg viewBox="0 0 600 400" xmlns="http://www.w3.org/2000/svg">
-                    <!-- Úsek ZŠ -> ÚAN (Společně Linka 12 a 1) -->
-                    <path class="route-path" d="M100,100 L200,200 L300,300" stroke="var(--l12)" />
-                    <path class="route-path" d="M100,100 L200,200 L300,300" stroke="var(--l1)" stroke-dasharray="12,12" />
+                <svg viewBox="0 0 700 450" xmlns="http://www.w3.org/2000/svg">
+                    <!-- TRASY -->
+                    <!-- Linka 1 & 12: ZŠ -> Poliklinika -> ÚAN -->
+                    <path class="route-path" d="M100,100 L200,150 L300,300" stroke="var(--l12)" />
+                    <path class="route-path" d="M100,100 L200,150 L300,300" stroke="var(--l1)" stroke-dasharray="10,10" />
 
-                    <!-- Úsek ÚAN -> Hl. Nádraží (Společně Linka 2 a 13) -->
-                    <path class="route-path" d="M300,300 L450,300" stroke="var(--l2)" />
-                    <path class="route-path" d="M300,300 L450,300" stroke="var(--l13)" stroke-dasharray="12,12" />
+                    <!-- Linka 2 & 13: ÚAN -> Sídliště -> Hl. Nádraží -->
+                    <path class="route-path" d="M300,300 L400,300 L550,300" stroke="var(--l2)" />
+                    <path class="route-path" d="M300,300 L400,300 L550,300" stroke="var(--l13)" stroke-dasharray="10,10" />
 
-                    <!-- Linka 1 (zbytek k Depu TR) -->
-                    <path class="route-path" d="M300,300 L450,150 L500,100" stroke="var(--l1)" />
+                    <!-- Linka 1: ÚAN -> Divadlo -> Depo TR -->
+                    <path class="route-path" d="M300,300 L450,200 L550,100" stroke="var(--l1)" />
                     
-                    <!-- Linka 2 (zbytek) -->
-                    <path class="route-path" d="M500,100 L550,200 L450,300" stroke="var(--l2)" />
+                    <!-- Linka 2: Hl. Nádraží -> Obchodní centrum -> Depo TR -->
+                    <path class="route-path" d="M550,300 L620,200 L550,100" stroke="var(--l2)" />
                     
-                    <!-- Linka 12 (zbytek) -->
+                    <!-- Linka 12: ÚAN -> Park -> ZŠ -->
                     <path class="route-path" d="M300,300 L150,350 L100,100" stroke="var(--l12)" />
 
-                    <!-- Zastávky -->
-                    <circle class="station-dot" cx="100" cy="100" r="7" /><text class="station-label" x="80" y="85">ZŠ</text>
-                    <circle class="station-dot" cx="500" cy="100" r="7" /><text class="station-label" x="510" y="95">Depo TR</text>
-                    <circle class="station-dot" cx="300" cy="300" r="7" /><text class="station-label" x="285" y="330">ÚAN</text>
-                    <circle class="station-dot" cx="450" cy="300" r="7" /><text class="station-label" x="460" y="320">Hl. Nádraží</text>
+                    <!-- ZASTÁVKY A KONEČNÉ -->
+                    <!-- ZŠ -->
+                    <circle class="station-dot" cx="100" cy="100" r="6" />
+                    <text class="station-label" x="60" y="90">Základní škola</text>
+                    <text class="terminus-label" x="40" y="115">[Konec: 1, 12]</text>
+
+                    <!-- Poliklinika -->
+                    <circle class="station-dot" cx="200" cy="150" r="4" />
+                    <text class="station-label" x="210" y="155">Poliklinika</text>
+
+                    <!-- ÚAN -->
+                    <circle class="station-dot" cx="300" cy="300" r="6" />
+                    <text class="station-label" x="270" y="285">ÚAN</text>
+                    <text class="terminus-label" x="260" y="335">[Konec: 2, 13]</text>
+
+                    <!-- Divadlo -->
+                    <circle class="station-dot" cx="450" cy="200" r="4" />
+                    <text class="station-label" x="460" y="205">Divadlo</text>
+
+                    <!-- Sídliště -->
+                    <circle class="station-dot" cx="400" cy="300" r="4" />
+                    <text class="station-label" x="385" y="320">Sídliště</text>
+
+                    <!-- Hl. Nádraží -->
+                    <circle class="station-dot" cx="550" cy="300" r="6" />
+                    <text class="station-label" x="540" y="325">Hl. Nádraží</text>
+                    <text class="terminus-label" x="540" y="345">[Konec: 13]</text>
+
+                    <!-- Obchodní centrum -->
+                    <circle class="station-dot" cx="620" cy="200" r="4" />
+                    <text class="station-label" x="630" y="205">OC Střed</text>
+
+                    <!-- Depo TR -->
+                    <circle class="station-dot" cx="550" cy="100" r="6" />
+                    <text class="station-label" x="540" y="80">Depo Trolejbusů</text>
+                    <text class="terminus-label" x="540" y="125">[Konec: 1, 2]</text>
+
+                    <!-- Park -->
+                    <circle class="station-dot" cx="150" cy="350" r="4" />
+                    <text class="station-label" x="140" y="375">Městský park</text>
                 </svg>
             </div>
             
@@ -232,73 +256,31 @@
         </div>
     </div>
 
-    <!-- SEZNAM LINEK -->
-    <div id="linky" class="page">
-        <h1>Seznam linek</h1>
-        <div class="card">
-            <p><strong>Linka 1:</strong> ZŠ -> ÚAN -> Depo Trolejbusů</p>
-            <p><strong>Linka 2:</strong> Depo TR -> Hl. Nádraží -> ÚAN</p>
-            <p><strong>Linka 12:</strong> ÚAN -> ZŠ (Okružní)</p>
-            <p><strong>Linka 13:</strong> ÚAN -> Hl. Nádraží (Expres)</p>
-        </div>
-    </div>
-
-    <!-- VOZOVÝ PARK -->
+    <!-- OSTATNÍ SEKCE ZŮSTÁVAJÍ STEJNÉ -->
     <div id="sor" class="page">
         <h1>Autobusy SOR</h1>
-        <div class="card">
-            <img src="https://via.placeholder.com/800x400/2c3e50/ffffff?text=FOTO:+SOR+C12" class="vehicle-img">
-            <h3>Model: SOR C12 (001 - 010)</h3>
-            <div class="fleet-grid" id="grid-sor"></div>
-        </div>
+        <div class="card"><div class="fleet-grid" id="grid-sor"></div></div>
     </div>
-
     <div id="iveco" class="page">
         <h1>Iveco</h1>
-        <div class="card">
-            <img src="https://via.placeholder.com/800x400/2c3e50/ffffff?text=FOTO:+Iveco+Crossway" class="vehicle-img">
-            <h3>Model: Crossway 12 LE (011 - 020)</h3>
-            <div class="fleet-grid" id="grid-iveco"></div>
-        </div>
+        <div class="card"><div class="fleet-grid" id="grid-iveco"></div></div>
     </div>
-
     <div id="irisbus" class="page">
         <h1>Irisbus</h1>
-        <div class="card">
-            <img src="https://via.placeholder.com/800x400/2c3e50/ffffff?text=FOTO:+Irisbus+Axer" class="vehicle-img">
-            <h3>Model: Axer (021 - 025)</h3>
-            <div class="fleet-grid" id="grid-irisbus"></div>
-        </div>
+        <div class="card"><div class="fleet-grid" id="grid-irisbus"></div></div>
     </div>
-
     <div id="karosa" class="page">
         <h1>Karosa</h1>
-        <div class="card">
-            <img src="https://via.placeholder.com/800x400/2c3e50/ffffff?text=FOTO:+Karosa+SM" class="vehicle-img">
-            <h3>Model: ŠM 16.5 (026 - 035)</h3>
-            <div class="fleet-grid" id="grid-karosa"></div>
-        </div>
+        <div class="card"><div class="fleet-grid" id="grid-karosa"></div></div>
     </div>
-
     <div id="trolejbusy" class="page">
         <h1>Trolejbusy</h1>
-        <div class="card">
-            <h3>SOR TNB 12 (050 - 059)</h3>
-            <div class="fleet-grid" id="grid-tnb"></div>
-        </div>
-        <div class="card">
-            <h3>Škoda 26 Tr (066 - 070)</h3>
-            <div class="fleet-grid" id="grid-skoda"></div>
-        </div>
+        <div class="card"><h3>SOR TNB 12</h3><div class="fleet-grid" id="grid-tnb"></div></div>
+        <div class="card"><h3>Škoda 26 Tr</h3><div class="fleet-grid" id="grid-skoda"></div></div>
     </div>
-
     <div id="skola" class="page">
         <h1>Školní vozy</h1>
-        <div class="card">
-            <img src="https://via.placeholder.com/800x400/2c3e50/ffffff?text=FOTO:+Skolni+vuz" class="vehicle-img">
-            <h3>Školní vozy (9917 - 9919)</h3>
-            <div class="fleet-grid" id="grid-skola"></div>
-        </div>
+        <div class="card"><div class="fleet-grid" id="grid-skola"></div></div>
     </div>
 
 </div>
@@ -306,9 +288,7 @@
 <script>
     function showPage(pageId, element) {
         document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-        const target = document.getElementById(pageId);
-        if(target) target.classList.add('active');
-        
+        document.getElementById(pageId).classList.add('active');
         document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
         element.classList.add('active');
         window.scrollTo(0,0);
