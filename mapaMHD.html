@@ -3,267 +3,228 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>KOKOTICE MAPS v6.0 - THE GIGACHAD EDITION</title>
+    <title>KOKOTICE MAPS v8.0 - THE FULL EDITION</title>
     <style>
         :root {
             --bg: #ffffff;
-            --panel: #ffffff;
-            --text: #111111;
-            --line1: #e74c3c; /* Červená - Městská */
-            --line2: #3498db; /* Modrá - Městská */
-            --line3: #f1c40f; /* Žlutá - Studentská */
-            --line333: #27ae60; /* Zelená - Regionální */
-            --line666: #8e44ad; /* Fialová - Expres do pekel */
-            --lineN5: #34495e; /* Šedá - Noční vyhlídka */
-            --train: #000000; /* Černá - Železnice */
+            --line1: #e74c3c; --line2: #3498db; --line3: #f1c40f; 
+            --line333: #27ae60; --line666: #8e44ad; --train: #000000;
         }
 
         body, html { 
             margin: 0; padding: 0; width: 100%; height: 100%; 
-            font-family: 'Segoe UI', Arial, sans-serif;
-            background: var(--bg); color: var(--text);
+            font-family: 'Arial Black', sans-serif; background: var(--bg);
             overflow: hidden; touch-action: none;
         }
 
-        #map-viewport { width: 100vw; height: 100vh; position: relative; overflow: hidden; cursor: grab; }
-
+        #viewport { width: 100vw; height: 100vh; position: relative; overflow: hidden; }
         #map-content {
-            position: absolute; width: 12000px; height: 12000px;
-            background-color: #ffffff;
-            background-image: 
-                linear-gradient(#f2f2f2 2px, transparent 2px),
-                linear-gradient(90deg, #f2f2f2 2px, transparent 2px);
-            background-size: 200px 200px;
-            transform-origin: 0 0;
+            position: absolute; width: 15000px; height: 15000px;
+            background-image: radial-gradient(#ddd 2px, transparent 2px);
+            background-size: 150px 150px; transform-origin: 0 0;
         }
 
-        svg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 5; }
-        
-        .route { fill: none; stroke-width: 12; stroke-linecap: round; stroke-linejoin: round; transition: opacity 0.3s; }
-        .train-route { stroke-dasharray: 30, 20; stroke-width: 10; opacity: 1; }
-        .night-route { stroke-dasharray: 10, 10; stroke-width: 6; opacity: 0.6; }
-        
+        svg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; }
+        .route { fill: none; stroke-width: 14; stroke-linecap: round; stroke-linejoin: round; }
+        .train-route { stroke-dasharray: 40, 20; stroke-width: 10; }
+
         .stop {
             position: absolute; width: 22px; height: 22px;
-            background: #fff; border: 5px solid #000;
-            border-radius: 50%; transform: translate(-50%, -50%);
-            z-index: 20; pointer-events: auto; cursor: pointer;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            background: #fff; border: 5px solid #000; border-radius: 50%;
+            transform: translate(-50%, -50%); z-index: 20; cursor: pointer;
         }
-        .stop.hub { width: 40px; height: 40px; border-width: 8px; }
-        .stop.train-stop { border-radius: 4px; width: 25px; height: 25px; }
+        .stop.hub { width: 45px; height: 45px; border-width: 9px; background: gold; }
+        .stop.field { width: 14px; height: 14px; border-width: 3px; }
 
         .label {
-            position: absolute; font-size: 16px; font-weight: 800;
+            position: absolute; font-size: 16px; font-weight: 900;
             color: #000; background: rgba(255,255,255,0.9);
-            padding: 2px 8px; border-radius: 4px; border: 1px solid #ddd;
+            padding: 2px 8px; border: 2px solid #000; border-radius: 4px;
             white-space: nowrap; transform: translate(-50%, 25px);
             pointer-events: none; z-index: 21;
-            box-shadow: 2px 2px 5px rgba(0,0,0,0.05);
         }
 
         /* --- GUI --- */
+        #ui-container { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1000; }
+        
+        .side-menu {
+            position: absolute; top: 15px; left: 15px; width: 280px;
+            background: white; border: 4px solid #000; padding: 15px;
+            pointer-events: auto; box-shadow: 8px 8px 0 #000;
+        }
+
         #info-card {
-            position: absolute; bottom: -100%; left: 50%; 
-            transform: translateX(-50%); width: 95%; max-width: 600px;
-            background: #ffffff; border-radius: 25px 25px 0 0;
-            padding: 30px; box-sizing: border-box;
-            transition: bottom 0.6s cubic-bezier(0.18, 0.89, 0.32, 1.28);
-            pointer-events: auto; border: 4px solid #000;
-            box-shadow: 0 -15px 50px rgba(0,0,0,0.2);
-            z-index: 5000;
+            position: absolute; bottom: -100%; left: 0; width: 100%;
+            background: white; border-top: 6px solid #000; padding: 25px;
+            box-sizing: border-box; transition: 0.5s cubic-bezier(0.18, 0.89, 0.32, 1.28); pointer-events: auto;
         }
         #info-card.active { bottom: 0; }
 
-        .close-btn { 
-            position: absolute; top: 20px; right: 25px; 
-            font-size: 32px; cursor: pointer; font-weight: 900;
-            color: #000;
-        }
-
         .controls { 
-            position: absolute; right: 25px; bottom: 40px; 
-            display: flex; flex-direction: column; gap: 15px; z-index: 1000;
+            position: absolute; right: 20px; bottom: 30px; 
+            display: flex; flex-direction: column; gap: 12px; pointer-events: auto;
         }
         .btn {
-            pointer-events: auto; width: 70px; height: 70px;
-            background: #000; color: #fff; border-radius: 20px;
-            font-size: 35px; display: flex; align-items: center; 
-            justify-content: center; box-shadow: 0 8px 20px rgba(0,0,0,0.3);
-            cursor: pointer;
+            width: 65px; height: 65px; background: #000; color: #fff;
+            border-radius: 12px; font-size: 30px; display: flex;
+            align-items: center; justify-content: center; cursor: pointer; border: none;
         }
+        .btn.locked { background: #ff4757; animation: blink 1s infinite; }
+        
+        @keyframes blink { 50% { background: #ff0000; } }
 
-        .badge {
-            display: inline-block; padding: 6px 15px; border-radius: 10px;
-            margin-right: 8px; font-weight: 900; font-size: 16px; border: 3px solid #000;
-            color: #000; margin-bottom: 5px;
-        }
+        .line-badge { display: inline-block; padding: 3px 8px; border-radius: 4px; color: white; font-size: 14px; margin-right: 5px; margin-bottom: 5px; font-weight: bold; }
 
-        .region-name {
-            position: absolute; font-size: 200px; font-weight: 900;
-            color: rgba(0,0,0,0.02); pointer-events: none; text-transform: uppercase;
-            white-space: nowrap;
-        }
-
-        .humor-box {
-            margin-top: 25px; padding: 20px; 
-            border: 3px dashed #000; background: #fffbe6;
-            border-radius: 15px; position: relative;
-        }
-        .humor-box::before {
-            content: "HLÁŠENÍ DISPEČINKU";
-            position: absolute; top: -12px; left: 20px;
-            background: #000; color: #fff; padding: 2px 10px;
-            font-size: 12px; font-weight: 900;
-        }
+        .area-text { position: absolute; font-size: 180px; font-weight: 900; color: rgba(0,0,0,0.03); text-transform: uppercase; pointer-events: none; }
     </style>
 </head>
 <body>
 
-<div id="map-viewport">
+<div id="viewport">
     <div id="map-content">
-        <div class="region-name" style="top: 5500px; left: 5500px;">KOKOTICE CITY</div>
-        <div class="region-name" style="top: 8500px; left: 8500px;">PRDELÁKOVICE</div>
-        <div class="region-name" style="top: 3000px; left: 3000px;">MOČŮVKY</div>
-        <div class="region-name" style="top: 6000px; left: 1500px;">ŘITKA</div>
-        <div class="region-name" style="top: 4000px; left: 7500px;">ZÁHADNÁ LHOTA</div>
+        <div class="area-text" style="top: 5500px; left: 5500px;">CENTRUM</div>
+        <div class="area-text" style="top: 8500px; left: 8500px;">PRDELÁKOVICE</div>
+        <div class="area-text" style="top: 3000px; left: 3000px;">MOČŮVKY</div>
+        <div class="area-text" style="top: 5500px; left: 2000px;">ŘITKA</div>
+        <div class="area-text" style="top: 3500px; left: 8000px;">ZÁHADNÁ LHOTA</div>
 
         <svg id="svg-layer"></svg>
         <div id="stops-layer"></div>
     </div>
 </div>
 
-<div class="controls">
-    <div class="btn" onclick="zoom(1.5)">+</div>
-    <div class="btn" onclick="zoom(0.5)">−</div>
-    <div class="btn" onclick="recenter()">⌂</div>
-</div>
+<div id="ui-container">
+    <div class="side-menu">
+        <h3 style="margin:0">KOKOTICE DISPEČINK</h3>
+        <hr border="1">
+        <input type="range" id="zoom-slider" min="0.1" max="1.5" step="0.05" value="0.4" style="width:100%">
+        <p style="font-size: 11px; margin: 5px 0;">ZOOM: Posuvník marnosti</p>
+        <div id="legend">
+            <div style="color:var(--line1)">● L1: Červená (Dělnická)</div>
+            <div style="color:var(--line2)">● L2: Modrá (Parky & Smažky)</div>
+            <div style="color:var(--line333)">● L333: Zelená (Agro-venkov)</div>
+            <div style="color:var(--line666)">● L666: Fialová (Expres Peklo)</div>
+            <div style="color:var(--train)">● VLAK: Černá (Nefunguje)</div>
+        </div>
+    </div>
 
-<div id="info-card">
-    <div class="close-btn" onclick="closeInfo()">×</div>
-    <h2 id="st-name" style="margin-top: 0; font-size: 32px; letter-spacing: -1px;">Název zastávky</h2>
-    <div id="st-badges"></div>
-    <div id="st-humor" class="humor-box"></div>
-    <p style="margin-top: 15px; font-size: 14px; color: #666;">Bezbariérový přístup: Pouze pokud umíte levitovat.</p>
+    <div class="controls">
+        <button id="lock-btn" class="btn" onclick="toggleLock()">🔓</button>
+        <button class="btn" onclick="recenter()">⌂</button>
+    </div>
+
+    <div id="info-card">
+        <div onclick="closeInfo()" style="float:right; font-size:40px; cursor:pointer">×</div>
+        <h2 id="st-name" style="margin-top:0">Zastávka</h2>
+        <div id="st-badges"></div>
+        <div id="st-humor" style="margin-top: 15px; background: #fffbe6; border: 3px dashed #000; padding: 15px; font-weight: bold;"></div>
+    </div>
 </div>
 
 <script>
-    const CONFIG = {
+    const DATA = {
         stops: [
-            // --- CENTRUM KOKOTICE ---
-            { id: 'vzn', n: 'VOZOVNA', x: 5500, y: 5500, l: ['1', 'TRN'], h: 'Tady autobusy spí a řidiči nadávají na život. Smrdí to tu jako v ropné rafinerii po výbuchu.' },
-            { id: 'skl', n: 'ZŠ KOKOTICE', x: 5750, y: 5500, l: ['1'], h: 'Místo, kde děti ztrácejí sny a učitelé trpělivost. Pokud uvidíš revizora, tvař se jako prvňáček.' },
-            { id: 'sid', n: 'SÍDLIŠTĚ MARNOST', x: 6000, y: 5300, l: ['1', '3', 'N5'], h: 'Kombinace betonu a deprese. Ideální místo na křížení linek 1 a 3 a taky na rychlou loupež.' },
-            { id: 'kfl', n: 'KAUFLAND', x: 6250, y: 5500, l: ['1', '333', 'N5'], h: 'Zde se bojuje o zlevněný bůček. Kdo nemá ostré lokty, ten tu nepřežije ranní nálet důchodců.' },
-            { id: 'nam', n: 'NÁMĚSTÍ OSVOBOZENÍ', x: 6700, y: 5500, l: ['1', '2', '3', '333', 'TRN', 'N5'], hub: true, h: 'Zlatý uzel. Tady se 1 a 2 potkávají a lidi tu čekají na spoje, které mají 20 minut zpoždění.' },
-            { id: 'nad', n: 'HLAVNÍ NÁDRAŽÍ', x: 7200, y: 5500, l: ['1', '2', 'TRN', '333', '666', 'N5'], hub: true, h: 'Vstup do jiného světa. Pokud přežiješ bagetu z automatu, jsi nesmrtelný. Vlaky odsud jedou všude, ale nikam včas.' },
-            { id: 'pru', n: 'PRŮMYSLOVÁ ZÓNA', x: 7600, y: 5500, l: ['1'], h: 'Zde se vyrábí věci, které nikdo nepotřebuje, lidmi, kteří by radši byli v hospodě.' },
-
-            // --- MĚSTSKÉ LINKY ---
-            { id: 'zam', n: 'ZÁMECKÝ PARK', x: 6700, y: 5100, l: ['2', 'N5'], h: 'Krásná příroda, pokud ignorujete ty injekční stříkačky v pískovišti. Linka 2 tudy projíždí jen aby se neřeklo.' },
-            { id: 'div', n: 'DIVADLO HRŮZY', x: 6700, y: 5300, l: ['2'], h: 'Kulturní stánek, kde největší drama probíhá venku na zastávce mezi bezdomovci.' },
-            { id: 'nak', n: 'NÁKUPNÍ ZÓNA JIH', x: 6700, y: 6000, l: ['2', '333'], h: 'Ráj pro lidi s prázdnou hlavou a plnou kreditkou. Parkoviště je větší než celé centrum města.' },
-            { id: 'uni', n: 'UNIVERZITA', x: 7200, y: 6000, l: ['3'], h: 'Zde se budoucí inteligence národa učí, jak přežít měsíc s pěti stovkami v kapse.' },
-            { id: 'kol', n: 'KOLEJE (Hnízdo hříchu)', x: 7200, y: 6400, l: ['3'], h: 'Zde linka 3 končí. Pokud vstoupíš dovnitř, okamžitě dostaneš kocovinu jen z toho vzduchu.' },
-
-            // --- REGIONÁLNÍ DÍRY ---
-            { id: 'rit', n: 'ŘITKA', x: 4000, y: 5500, l: ['333'], h: 'Název zastávky přesně popisuje tvou životní situaci, pokud jsi nucen tu vystoupit.' },
-            { id: 'uje_s', n: 'SMRADLAVÝ ÚJEZDEC', x: 4800, y: 5500, l: ['333', 'TRN'], h: 'Místní chemická továrna zajišťuje, že se tu lidi dožívají průměrně 40 let, ale svítí ve tmě.' },
-            { id: 'moc', n: 'MOČŮVKY', x: 5000, y: 3500, l: ['333', 'TRN'], h: 'Před vystupováním doporučujeme nasadit plynovou masku. Místní rybník je v podstatě kyselina.' },
-            { id: 'lht', n: 'ZÁHADNÁ LHOTA', x: 8500, y: 4000, l: ['333'], h: 'Zastávka uprostřed ničeho. Řidič autobusu 333 tu zastavuje jen když má halucinace.' },
-            { id: 'kzh', n: 'KOZÍ HŘBET', x: 4500, y: 7500, l: ['666'], h: 'Tady se kozy pasou na zbytcích vyhozených pneumatik. Drsný kraj pro drsné linky.' },
+            // MĚSTO
+            { id: 'vzn', n: 'VOZOVNA', x: 5500, y: 5500, l: ['1', 'TRN'], h: 'Tady se budí autobusy. Pokud sem dojedeš po desátý večer, řidič tě zamkne v garáži a musíš mu čistit výfuk.' },
+            { id: 'skl', n: 'ZŠ KOKOTICE', x: 5800, y: 5500, l: ['1'], h: 'Tady děti brečí, protože musí do školy, a dospělí brečí, protože musí do práce. Symbióza utrpení.' },
+            { id: 'sid', n: 'SÍDLIŠTĚ MARNOST', x: 6100, y: 5200, l: ['1', '3'], h: 'Místo, kde i holubi berou antidepresiva. Ideální pro nákup drog nebo dostání přes držku.' },
+            { id: 'kfl', n: 'KAUFLAND', x: 6400, y: 5500, l: ['1', '333'], h: 'Aréna smrti. Pokud nemáš slevový leták, jsi lovná zvěř. Pozor na babičky s berlemi, jsou vycvičené v boji zblízka.' },
+            { id: 'nam', n: 'NÁMĚSTÍ OSVOBOZENÍ', x: 7000, y: 5500, l: ['1', '2', '3', '333', 'TRN'], hub: true, h: 'Srdce města. Smrdí to tu kebabem, močí a falešnou nadějí. 1 a 2 se tu kříží, aby lidi mohli přestoupit z jedné chyby na druhou.' },
+            { id: 'nad', n: 'HLAVNÍ NÁDRAŽÍ', x: 7500, y: 5500, l: ['1', '2', 'TRN', '333', '666'], hub: true, h: 'Zde končí hygiena a začíná dobrodružství. Vzduch je z 80% tvořen výpary z levného vína. Bageta z automatu je starší než samotná česká státnost.' },
+            { id: 'pru', n: 'PRŮMYSLOVÁ ZÓNA', x: 8000, y: 5500, l: ['1'], h: 'Lidská masomlejnka. Tady vyměníš 8 hodin života za pár drobných na pivo.' },
             
-            // --- PRDELÁKOVICE A PEKLO ---
-            { id: 'prd', n: 'PRDELÁKOVICE', x: 9500, y: 9500, l: ['TRN', '666', '333'], hub: true, h: 'Konečná stanice světa. Tady končí asfalt, naděje i Wi-Fi signál. Vlak sem jede věčnost.' },
-            { id: 'pek', n: 'PEKELNÝ DŮL', x: 10500, y: 10500, l: ['666'], h: 'Linka 666 tě doveze až sem. Je tu pořádný teplo, ale aspoň tu nejezdí revizoři.' },
-            { id: 'kok', n: 'HRAD KOKOTÍN', x: 9500, y: 8000, l: ['TRN'], h: 'Historická zřícenina, která vypadá líp než hlavní nádraží v Kokoticích.' }
+            // OBCE & MEZIZASTÁVKY
+            { id: 'rit', n: 'ŘITKA', x: 3000, y: 5500, l: ['333'], h: 'Doslova prdel světa. Pokud jsi dojel až sem, tak jsi buď zaspal, nebo jsi fakt v koncích.' },
+            { id: 'fld1', n: 'U HNOJIŠTĚ (Znamení)', x: 4000, y: 5500, l: ['333'], field: true, h: 'Zastávka na znamení. Pokud nezamáváš jako o život, řidič se ti vysměje a přidá plyn.' },
+            { id: 'uje_s', n: 'SMRADLAVÝ ÚJEZDEC', x: 4800, y: 5500, l: ['333', 'TRN'], h: 'Vzduch je tu tak hustý, že se dá krájet a prodávat jako brikety. Místní svítí ve tmě.' },
+            { id: 'moc', n: 'MOČŮVKY', x: 4500, y: 3000, l: ['333', 'TRN'], h: 'Název odpovídá kvalitě místní spodní vody. Jediný důvod k výstupu je, že autobus začal hořet.' },
+            { id: 'fld2', n: 'U ZCHLÍPLÉ KOZY', x: 9000, y: 7500, l: ['333'], field: true, h: 'Tady chcípl pes a o kus dál i ta koza. Nic tu není, jen ticho a strach.' },
+            { id: 'lht', n: 'ZÁHADNÁ LHOTA', x: 9500, y: 4000, l: ['333'], h: 'Záhada je, proč sem vůbec něco jede. Nikdo tu nikdy nenastoupil ani nevystoupil.' },
+            { id: 'prd', n: 'PRDELÁKOVICE', x: 10000, y: 10000, l: ['TRN', '333', '666'], hub: true, h: 'Zde lišky dávají dobrou noc pervitinem. Konečná stanice existence. Vlak sem jede hodinu, ale mentálně zestárneš o deset let.' },
+            { id: 'pek', n: 'PEKELNÝ DŮL', x: 11500, y: 11500, l: ['666'], h: 'Tady topí 24/7. Linka 666 sem vozí politiky a revizory.' }
         ],
         routes: [
-            { id: '1', s: ['vzn','skl','sid','kfl','nam','nad','pru'], c: '#e74c3c', off: -12 },
-            { id: '2', s: ['zam','div','nam','nad','nak'], c: '#3498db', off: 0 },
-            { id: '3', s: ['sid','nam','uni','kol'], c: '#f1c40f', off: 12 },
-            { id: '333', s: ['rit','uje_s','kfl','nam','nad','nak','moc','lht','prd'], c: '#27ae60', off: -6 },
-            { id: '666', s: ['kzh','nad','prd','pek'], c: '#8e44ad', off: 6 },
-            { id: 'n5', s: ['sid','kfl','nam','nad','zam'], c: '#34495e', off: 0, night: true },
-            { id: 'trn', s: ['vzn','uje_s','nam','nad','moc','kok','prd'], c: '#000000', off: 0, train: true }
+            { id: '1', s: ['vzn','skl','sid','kfl','nam','nad','pru'], c: 'var(--line1)', off: -15 },
+            { id: '2', s: ['nam','nad'], c: 'var(--line2)', off: 0 },
+            { id: '333', s: ['rit','fld1','uje_s','kfl','nam','nad','fld2', 'lht', 'prd'], c: 'var(--line333)', off: 10 },
+            { id: '666', s: ['nad','prd','pek'], c: 'var(--line666)', off: -5 },
+            { id: 'trn', s: ['vzn', 'uje_s', 'nam', 'nad', 'moc', 'prd'], c: 'var(--train)', off: 0, trn: true }
         ]
     };
 
-    let scale = 0.4, posX = window.innerWidth/2 - 6700*scale, posY = window.innerHeight/2 - 5500*scale;
-    const content = document.getElementById('map-content');
+    let scale = 0.4, posX = window.innerWidth/2 - 7000*scale, posY = window.innerHeight/2 - 6000*scale;
+    let isLocked = false;
+    const world = document.getElementById('map-content');
 
     function init() {
         const svg = document.getElementById('svg-layer');
-        // Render tras s dynamickým offsetem
-        CONFIG.routes.forEach(r => {
+        DATA.routes.forEach(r => {
             const p = document.createElementNS("http://www.w3.org/2000/svg", "path");
-            p.classList.add('route');
-            if(r.train) p.classList.add('train-route');
-            if(r.night) p.classList.add('night-route');
+            p.classList.add('route'); if(r.trn) p.classList.add('train-route');
             p.setAttribute('stroke', r.c);
-            
             let d = "";
             r.s.forEach((sid, i) => {
-                const s = CONFIG.stops.find(x => x.id === sid);
-                if(s) {
-                    const ox = r.off;
-                    const oy = r.off;
-                    d += (i===0?'M':'L') + (s.x + ox) + ' ' + (s.y + oy);
-                }
+                const s = DATA.stops.find(x => x.id === sid);
+                if(s) d += (i===0?'M':'L') + (s.x + r.off) + ' ' + (s.y + r.off);
             });
-            p.setAttribute('d', d);
-            svg.appendChild(p);
+            p.setAttribute('d', d); svg.appendChild(p);
         });
 
-        // Render zastávek
         const layer = document.getElementById('stops-layer');
-        CONFIG.stops.forEach(s => {
-            const stop = document.createElement('div');
-            stop.className = 'stop' + (s.hub ? ' hub' : '') + (s.l.includes('TRN') ? ' train-stop' : '');
-            stop.style.left = s.x + 'px'; stop.style.top = s.y + 'px';
-            stop.onclick = (e) => { e.stopPropagation(); showInfo(s); };
-            
+        DATA.stops.forEach(s => {
+            const dot = document.createElement('div');
+            dot.className = 'stop' + (s.hub?' hub':'') + (s.field?' field':'');
+            dot.style.left = s.x + 'px'; dot.style.top = s.y + 'px';
+            dot.onclick = (e) => { e.stopPropagation(); showStop(s); };
             const lbl = document.createElement('div');
             lbl.className = 'label'; lbl.innerText = s.n;
             lbl.style.left = s.x + 'px'; lbl.style.top = s.y + 'px';
-            
-            layer.appendChild(stop);
-            layer.appendChild(lbl);
+            layer.appendChild(dot); layer.appendChild(lbl);
         });
         update();
     }
 
-    // INTERAKCE (MOUSE + TOUCH)
+    function toggleLock() {
+        isLocked = !isLocked;
+        document.getElementById('lock-btn').innerText = isLocked ? '🔒' : '🔓';
+        document.getElementById('lock-btn').classList.toggle('locked', isLocked);
+    }
+
+    document.getElementById('zoom-slider').oninput = function() {
+        scale = parseFloat(this.value);
+        update();
+    };
+
     let isDrag = false, startX, startY;
-    const evStart = e => { 
-        isDrag = true; 
+    const start = e => {
+        if(isLocked) return;
+        isDrag = true;
         startX = (e.touches?e.touches[0].clientX:e.clientX) - posX;
         startY = (e.touches?e.touches[0].clientY:e.clientY) - posY;
     };
-    const evMove = e => {
-        if(!isDrag) return;
+    const move = e => {
+        if(!isDrag || isLocked) return;
         posX = (e.touches?e.touches[0].clientX:e.clientX) - startX;
         posY = (e.touches?e.touches[0].clientY:e.clientY) - startY;
         update();
     };
-    window.addEventListener('mousedown', evStart); window.addEventListener('mousemove', evMove);
+    window.addEventListener('mousedown', start); window.addEventListener('mousemove', move);
     window.addEventListener('mouseup', () => isDrag = false);
-    window.addEventListener('touchstart', evStart); window.addEventListener('touchmove', evMove);
+    window.addEventListener('touchstart', start); window.addEventListener('touchmove', move);
     window.addEventListener('touchend', () => isDrag = false);
 
-    function update() { content.style.transform = `translate(${posX}px, ${posY}px) scale(${scale})`; }
-    function zoom(f) { scale *= f; update(); }
-    function recenter() { scale = 0.4; posX = window.innerWidth/2 - 6700*scale; posY = window.innerHeight/2 - 5500*scale; update(); }
-
-    function showInfo(s) {
+    function update() { world.style.transform = `translate(${posX}px, ${posY}px) scale(${scale})`; }
+    function recenter() { scale = 0.4; posX = window.innerWidth/2 - 7000*scale; posY = window.innerHeight/2 - 6000*scale; update(); document.getElementById('zoom-slider').value = 0.4; }
+    
+    function showStop(s) {
         document.getElementById('st-name').innerText = s.n;
-        document.getElementById('st-badges').innerHTML = s.l.map(l => `<span class="badge" style="background:${getColor(l)}">${l}</span>`).join('');
-        document.getElementById('st-humor').innerText = s.h;
+        document.getElementById('st-badges').innerHTML = s.l.map(l => `<span class="line-badge" style="background:${getCol(l)}">${l}</span>`).join('');
+        document.getElementById('st-humor').innerText = "HLÁŠENÍ: " + s.h;
         document.getElementById('info-card').classList.add('active');
     }
-    function getColor(l) {
-        const r = CONFIG.routes.find(x => x.id.toLowerCase() === l.toLowerCase());
-        return r ? r.c : '#eee';
+    function getCol(l) {
+        const r = DATA.routes.find(x => x.id === l);
+        return r ? r.c : '#333';
     }
     function closeInfo() { document.getElementById('info-card').classList.remove('active'); }
 
