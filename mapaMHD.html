@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <title>Interaktivní Mapa MHD Kokotice</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; background: #f0f2f5; overflow: hidden; }
+        #app { display: flex; flex-direction: column; height: 100vh; }
+        header { background: #2c3e50; color: white; padding: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); z-index: 10; }
+        
+        #map-container { 
+            flex: 1; 
+            position: relative; 
+            overflow: auto; 
+            cursor: grab;
+            background-color: #e5e5e5;
+            background-image: radial-gradient(#d1d1d1 1px, transparent 1px);
+            background-size: 40px 40px;
+        }
+        #map-container:active { cursor: grabbing; }
+
+        .canvas { 
+            position: relative; 
+            width: 3000px; 
+            height: 2000px; 
+        }
+
+        /* --- LINKY --- */
+        .line { position: absolute; border-radius: 10px; z-index: 1; }
+        
+        /* Linka 1 - Červená (Páteřní) */
+        #line1 { height: 8px; background: #e74c3c; width: 1200px; top: 1000px; left: 200px; }
+        
+        /* Linka 2 - Modrá */
+        #line2 { width: 8px; background: #3498db; height: 600px; top: 600px; left: 1000px; }
+        
+        /* Vlakový koridor - Černý s bílým přerušováním */
+        .rail { position: absolute; height: 12px; background: #333; border: 2px solid white; z-index: 0; width: 2600px; top: 1050px; left: 0; opacity: 0.3; }
+
+        /* --- ZASTÁVKY --- */
+        .stop { 
+            position: absolute; 
+            width: 16px; 
+            height: 16px; 
+            background: white; 
+            border: 4px solid #2c3e50; 
+            border-radius: 50%; 
+            z-index: 5;
+            transform: translate(-50%, -50%);
+        }
+        .stop:hover::after {
+            content: attr(data-name);
+            position: absolute;
+            bottom: 25px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: black;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+            white-space: nowrap;
+            font-size: 12px;
+        }
+
+        .label { position: absolute; font-size: 14px; font-weight: bold; color: #2c3e50; pointer-events: none; }
+
+        /* Specifické lokace */
+        .village { position: absolute; padding: 20px; border: 2px dashed #999; border-radius: 10px; color: #777; }
+
+        /* Legend */
+        #legend { position: fixed; bottom: 20px; right: 20px; background: white; padding: 15px; border-radius: 10px; box-shadow: 0 0 15px rgba(0,0,0,0.1); z-index: 100; }
+        .legend-item { display: flex; align-items: center; margin-bottom: 5px; }
+        .box { width: 20px; height: 10px; margin-right: 10px; border-radius: 2px; }
+    </style>
+</head>
+<body>
+
+<div id="app">
+    <header>
+        <h1>City of Kokotice - Regionální doprava</h1>
+        <p>Použijte posuvníky nebo táhněte myší pro prohlížení okolních obcí</p>
+    </header>
+
+    <div id="map-container">
+        <div class="canvas" id="canvas">
+            <div class="rail"></div>
+            <div class="label" style="top: 1030px; left: 50px;">HLAVNÍ ŽELEZNIČNÍ KORIDOR (SMĚR DALEKÝ BROD)</div>
+
+            <div class="village" style="top: 100px; left: 100px;">OBEC: SMRADLAVÝ ÚJEZDEC</div>
+            <div class="village" style="top: 1500px; left: 2200px;">OBEC: KOKOTSKÝ ÚJEZDEC</div>
+            <div class="village" style="top: 200px; left: 2000px;">OBEC: HRDLOŘEZY</div>
+
+            <div id="line1" class="line"></div>
+            <div class="stop" data-name="VOZOVNA" style="top: 1004px; left: 200px;"></div>
+            <div class="label" style="top: 1020px; left: 170px;">VOZOVNA</div>
+
+            <div class="stop" data-name="ŠKOLA" style="top: 1004px; left: 400px;"></div>
+            <div class="label" style="top: 1020px; left: 380px;">ŠKOLA</div>
+
+            <div class="stop" data-name="KAUFLAND" style="top: 1004px; left: 600px;"></div>
+            <div class="label" style="top: 1020px; left: 575px;">KAUFLAND</div>
+
+            <div class="stop" data-name="NÁMĚSTÍ OSVOBOZENÍ" style="top: 1004px; left: 1000px; width: 24px; height: 24px; border-color: gold;"></div>
+            <div class="label" style="top: 970px; left: 940px; font-size: 18px;">NÁMĚSTÍ OSVOBOZENÍ (PŘESTUP 1+2)</div>
+
+            <div class="stop" data-name="NÁDRAŽÍ ČD" style="top: 1004px; left: 1300px; background: #333;"></div>
+            <div class="label" style="top: 1020px; left: 1270px;">NÁDRAŽÍ ČD (VLAK)</div>
+
+            <div class="stop" data-name="PRŮMYSLOVÁ ZÓNA" style="top: 1004px; left: 1600px;"></div>
+            <div class="label" style="top: 1020px; left: 1550px;">PRŮMYSLOVÁ ZÓNA</div>
+
+            <div id="line2" class="line"></div>
+            <div class="stop" data-name="ZÁMECKÝ PARK" style="top: 600px; left: 1004px;"></div>
+            <div class="label" style="top: 600px; left: 1030px;">ZÁMECKÝ PARK</div>
+            
+            <div class="stop" data-name="NÁKUPNÍ ZÓNA" style="top: 1200px; left: 1004px;"></div>
+            <div class="label" style="top: 1200px; left: 1030px;">NÁKUPNÍ ZÓNA</div>
+        </div>
+    </div>
+
+    <div id="legend">
+        <strong>Legenda</strong>
+        <div class="legend-item"><div class="box" style="background: #e74c3c;"></div> Linka 1</div>
+        <div class="legend-item"><div class="box" style="background: #3498db;"></div> Linka 2</div>
+        <div class="legend-item"><div class="box" style="background: #333; border: 1px solid white;"></div> Železnice (Vlak)</div>
+        <p style="font-size: 10px; margin-top: 10px;">* Přesuňte se k okrajům pro obce</p>
+    </div>
+</div>
+
+<script>
+    const container = document.getElementById('map-container');
+    let isDown = false;
+    let startX;
+    let startY;
+    let scrollLeft;
+    let scrollTop;
+
+    container.addEventListener('mousedown', (e) => {
+        isDown = true;
+        startX = e.pageX - container.offsetLeft;
+        startY = e.pageY - container.offsetTop;
+        scrollLeft = container.scrollLeft;
+        scrollTop = container.scrollTop;
+    });
+    container.addEventListener('mouseleave', () => { isDown = false; });
+    container.addEventListener('mouseup', () => { isDown = false; });
+    container.addEventListener('mousemove', (e) => {
+        if(!isDown) return;
+        e.preventDefault();
+        const x = e.pageX - container.offsetLeft;
+        const y = e.pageY - container.offsetTop;
+        const walkX = (x - startX);
+        const walkY = (y - startY);
+        container.scrollLeft = scrollLeft - walkX;
+        container.scrollTop = scrollTop - walkY;
+    });
+
+    // Centrování na Náměstí
+    window.onload = () => {
+        container.scrollLeft = 600;
+        container.scrollTop = 700;
+    };
+</script>
+
+</body>
+</html>
